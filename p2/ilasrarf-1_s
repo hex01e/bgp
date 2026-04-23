@@ -1,0 +1,28 @@
+# Router1 Static VXLAN Configuration
+# eth0: connects to switch (10.1.1.1/30)
+# eth1: connects to host1
+# vxlan10: VXLAN tunnel to router2
+# br0: bridge connecting eth1 and vxlan10
+
+# Step 1 - Configure interfaces
+ip link set eth0 up
+ip addr add 10.1.1.1/30 dev eth0
+ip link set eth1 up
+
+# Step 2 - Create VXLAN tunnel (static)
+# id 10 = VNI number
+# remote = router2's IP
+# dstport = standard VXLAN port
+ip link add vxlan10 type vxlan \
+    id 10 \
+    remote 10.1.1.2 \
+    dstport 4789 \
+    dev eth0
+ip link set vxlan10 up
+
+# Step 3 - Create bridge
+# br0 connects eth1 and vxlan10 together
+ip link add br0 type bridge
+ip link set br0 up
+ip link set eth1 master br0
+ip link set vxlan10 master br0

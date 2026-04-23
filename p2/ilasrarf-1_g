@@ -1,0 +1,31 @@
+# Router1 Dynamic Multicast VXLAN Configuration
+# eth0: connects to switch (10.1.1.1/30)
+# eth1: connects to host1
+# vxlan10: VXLAN tunnel using multicast
+# br0: bridge connecting eth1 and vxlan10
+
+# Step 1 - Configure interfaces
+ip link set eth0 up
+ip addr add 10.1.1.1/30 dev eth0
+ip link set eth1 up
+
+# Step 2 - Remove static vxlan if exists
+ip link set vxlan10 nomaster 2>/dev/null
+ip link delete vxlan10 2>/dev/null
+
+# Step 3 - Create VXLAN tunnel (multicast)
+# group = multicast group address
+# all routers join same group
+# they find each other automatically!
+ip link add vxlan10 type vxlan \
+    id 10 \
+    group 239.1.1.1 \
+    dstport 4789 \
+    dev eth0
+ip link set vxlan10 up
+
+# Step 4 - Create bridge
+ip link add br0 type bridge
+ip link set br0 up
+ip link set eth1 master br0
+ip link set vxlan10 master br0
