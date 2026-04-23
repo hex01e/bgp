@@ -1,22 +1,21 @@
 #!/bin/sh
-# VTEP 4 underlay/EVPN/VXLAN setup
-# Enable Linux IPv4 forwarding.
+# ip vtep 4 evpn vxlan setup.
+# ip enable linux ipv4 forwarding.
 sysctl -w net.ipv4.ip_forward=1
-# Ensure loopback interface is administratively up.
+# ip set loopback interface up.
 ip link set lo up
-# Assign VTEP loopback /32 used for router-id and VXLAN source.
+# ip add loopback /32 for router id and vxlan source.
 ip addr add 1.1.1.4/32 dev lo
-# Bring underlay uplink toward RR up.
+# ip set link to rr up.
 ip link set eth0 up
-# Set p2p underlay IP toward RR.
+# ip add p2p address to rr link.
 ip addr add 10.0.14.2/30 dev eth0
 
-# Configure OSPF: set router-id and advertise loopback plus underlay uplink.
-# OSPF cmd: enter global configuration mode.
-# OSPF cmd: enter OSPF configuration context.
-# OSPF cmd: set OSPF router-id to loopback IP.
-# OSPF cmd: advertise loopback /32 in area 0.
-# OSPF cmd: advertise underlay uplink subnet in area 0.
+# ip ospf enter global config mode.
+# ip ospf enter router ospf mode.
+# ip ospf set router id.
+# ip ospf advertise loopback /32 in area 0.
+# ip ospf advertise rr link subnet in area 0.
 vtysh \
 	-c "configure terminal" \
 	-c "router ospf" \
@@ -24,16 +23,15 @@ vtysh \
 	-c "network 1.1.1.4/32 area 0" \
 	-c "network 10.0.14.0/30 area 0"
 
-# Configure BGP EVPN: RR neighbor, loopback source, activate EVPN, advertise VNIs.
-# BGP cmd: enter global configuration mode.
-# BGP cmd: enter BGP process for AS 100.
-# BGP cmd: set BGP router-id to loopback IP.
-# BGP cmd: define RR as iBGP neighbor.
-# BGP cmd: source BGP session from loopback interface.
-# BGP cmd: enter EVPN address-family.
-# BGP cmd: activate EVPN for RR neighbor.
-# BGP cmd: advertise all local VNIs in EVPN.
-# BGP cmd: exit EVPN address-family.
+# ip bgp enter global config mode.
+# ip bgp enter router bgp 100 mode.
+# ip bgp set router id.
+# ip bgp add rr neighbor.
+# ip bgp use loopback as source.
+# ip bgp enter evpn address family.
+# ip bgp activate evpn for rr neighbor.
+# ip bgp advertise all vni.
+# ip bgp exit evpn address family.
 vtysh \
 	-c "configure terminal" \
 	-c "router bgp 100" \
@@ -44,17 +42,17 @@ vtysh \
 	-c "neighbor 1.1.1.1 activate" \
 	-c "advertise-all-vni" \
 	-c "exit-address-family"
-# Create VXLAN interface vxlan10 (VNI 10, UDP 4789, local loopback source).
+# ip create vxlan interface vni 10.
 ip link add vxlan10 type vxlan id 10 dstport 4789 local 1.1.1.4 nolearning
-# Bring VXLAN interface up.
+# ip set vxlan interface up.
 ip link set vxlan10 up
-# Create Linux bridge br0.
+# ip create bridge br0.
 ip link add br0 type bridge
-# Bring bridge interface up.
+# ip set bridge br0 up.
 ip link set br0 up
-# Add VXLAN interface to bridge.
+# ip add vxlan interface to bridge.
 ip link set vxlan10 master br0
-# Add host-facing access port eth1 to bridge.
+# ip add host port eth1 to bridge.
 ip link set eth1 master br0
-# Bring host-facing access port up.
+# ip set host port eth1 up.
 ip link set eth1 up
