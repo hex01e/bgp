@@ -1,3 +1,0 @@
-# Remove current vxlan
-ip link set vxlan10 nomaster
-ip link delete vxlan10
