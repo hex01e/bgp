@@ -1,5 +1,11 @@
-FROM frrouting/frr:v8.4.0
+FROM alpine:latest
 
+RUN apk update && apk upgrade
+
+RUN apk add --no-cache busybox iproute2 frr
+
+# Enable FRR daemons
 RUN sed -i -E 's/(bgpd|isisd|ospfd)(\s*=\s*)no/\1\2yes/' /etc/frr/daemons
 
-
+# Start FRR and keep container alive
+CMD ["sh", "-c", "if [ ! -x /usr/lib/frr/frrinit.sh ]; then echo 'Error: /usr/lib/frr/frrinit.sh not found' >&2; exit 1; fi; /usr/lib/frr/frrinit.sh start; tail -f /dev/null"]
