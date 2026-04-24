@@ -49,7 +49,7 @@ ip link add br0 type bridge
 ip link set br0 up
 # ip add vxlan interface to bridge.
 ip link set vxlan10 master br0
-# ip add host port eth1 to bridge.
-ip link set eth1 master br0
-# ip set host port eth1 up.
-ip link set eth1 up
+# ip add host port eth0 to bridge.
+ip link set eth0 master br0
+# ip set host port eth0 up.
+ip link set eth0 up
