@@ -1,3 +1,5 @@
 # Host1 Configuration
+# ip set host interface up.
 ip link set eth1 up
+# ip add host ip address.
 ip addr add 30.1.1.1/24 dev eth1
