@@ -1,7 +1,9 @@
 FROM alpine:latest
 
+# Update tools
 RUN apk update && apk upgrade
 
+# Install frrouting/ip amd busybox
 RUN apk add --no-cache busybox iproute2 frr
 
 # Enable FRR daemons
